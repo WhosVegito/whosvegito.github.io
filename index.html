@@ -1,741 +1,490 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Is This Normal? — Legal Plain-English Decoder</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=JetBrains+Mono:wght@400;500;600&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Aaranya Sharma</title>
+<meta name="description" content="Aaranya Sharma: security research, data systems and IoT. Computer Science, SRM 2027.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0D0F14;--bg2:#13161D;--bg3:#1A1E28;--bg4:#222838;
-  --line:#ffffff0f;--line2:#ffffff18;--line3:#ffffff28;
-  --text:#E8EAF0;--text2:#9CA3B4;--text3:#555E72;
-  --accent:#F5A623;--accent2:#FF6B35;
-  --blue:#4A9EFF;--green:#2DD4A0;--red:#FF5252;--amber:#FFC107;
-  --serif:'Playfair Display',serif;--mono:'JetBrains Mono',monospace;--sans:'Nunito',sans-serif;
-  --r:8px;
+  --bg:#F2F4F7; --surface:#FFFFFF; --surface-2:#E8EBF1; --ink:#0E1726; --muted:#586174;
+  --line:#D3D9E3; --accent:#2F46F5; --accent-ink:#FFFFFF; --accent-soft:#E3E7FF;
+  --good:#14805A; --good-soft:#DDF3EA; --bad:#C2372B; --bad-soft:#FBE3E0; --amber:#B86E00;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono:"JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --radius:14px; --maxw:1160px;
 }
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0A0E16; --surface:#121827; --surface-2:#1A2233; --ink:#E9EDF5; --muted:#909AAE;
+    --line:#252F43; --accent:#8394FF; --accent-ink:#0A0E16; --accent-soft:#1D2548;
+    --good:#4FD1A0; --good-soft:#12322A; --bad:#FF7A6E; --bad-soft:#3A1A1A; --amber:#F2B24C;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0A0E16; --surface:#121827; --surface-2:#1A2233; --ink:#E9EDF5; --muted:#909AAE;
+  --line:#252F43; --accent:#8394FF; --accent-ink:#0A0E16; --accent-soft:#1D2548;
+  --good:#4FD1A0; --good-soft:#12322A; --bad:#FF7A6E; --bad-soft:#3A1A1A; --amber:#F2B24C;
+}
+
+*{box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overflow-x:hidden}
-body::before{
-  content:'';position:fixed;inset:0;
-  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
-  background-size:48px 48px;pointer-events:none;z-index:0;
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;padding-inline:clamp(16px,4vw,40px)}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:4px}
+.wrap{max-width:var(--maxw);margin-inline:auto}
+h1,h2,h3{font-family:var(--display);line-height:1.05;text-wrap:balance;margin:0}
+p{margin:0}
+.mono{font-family:var(--mono)}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+
+/* nav */
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line);margin-inline:calc(-1*clamp(16px,4vw,40px));padding-inline:clamp(16px,4vw,40px)}
+.nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;height:60px}
+.logo{font-family:var(--display);font-weight:800;font-size:20px;text-decoration:none;letter-spacing:-.02em}
+.logo span{color:var(--accent)}
+.nav ul{display:flex;gap:26px;list-style:none;margin:0;padding:0;font-size:14px}
+.nav ul a{text-decoration:none;color:var(--muted)}
+.nav ul a:hover{color:var(--ink)}
+.btn{display:inline-flex;align-items:center;gap:8px;font:500 14px/1 var(--body);padding:12px 18px;border-radius:999px;text-decoration:none;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;transition:transform .15s ease,border-color .15s ease}
+.btn:hover{transform:translateY(-1px);border-color:var(--ink)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.primary:hover{border-color:var(--accent)}
+@media (max-width:760px){.nav ul{display:none}}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1.15fr .85fr;gap:clamp(28px,5vw,64px);align-items:center;padding-block:clamp(48px,8vw,96px) clamp(40px,6vw,72px)}
+.status{display:inline-flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:6px 12px 6px 10px;background:var(--surface)}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--good);box-shadow:0 0 0 0 var(--good);animation:ping 2.4s infinite}
+@keyframes ping{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--good) 60%,transparent)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
+.name{font-size:clamp(56px,11vw,132px);font-weight:800;letter-spacing:-.045em;line-height:.9;margin-top:22px}
+.name .l2{display:block;color:transparent;-webkit-text-stroke:1.5px var(--ink)}
+.role{margin-top:26px;font-family:var(--display);font-size:clamp(20px,2.6vw,28px);font-weight:400;line-height:1.25;max-width:26ch;letter-spacing:-.01em}
+.role em{font-style:normal;color:var(--accent);font-weight:600}
+.lede{margin-top:16px;color:var(--muted);max-width:56ch}
+.cta{display:flex;flex-wrap:wrap;gap:10px;margin-top:28px}
+
+/* validator widget */
+.console{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:0 30px 60px -30px color-mix(in srgb,var(--ink) 35%,transparent);overflow:hidden}
+.console-head{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12px;color:var(--muted)}
+.console-head b{color:var(--ink);font-weight:500}
+.console-body{padding:18px 16px 16px;display:grid;gap:14px}
+.claim-label{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.claim{font-family:var(--mono);font-size:14px;line-height:1.5;min-height:3em;margin-top:6px}
+.claim .caret{display:inline-block;width:8px;height:1em;background:var(--accent);vertical-align:-2px;margin-left:2px;animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.checks{display:grid;gap:8px;font-family:var(--mono);font-size:12.5px}
+.check{display:flex;justify-content:space-between;gap:12px;padding:8px 10px;border-radius:8px;background:var(--surface-2)}
+.check span:last-child{font-weight:500}
+.ok{color:var(--good)} .no{color:var(--bad)}
+.meter{height:8px;border-radius:99px;background:var(--surface-2);overflow:hidden}
+.meter i{display:block;height:100%;width:0;background:var(--accent);border-radius:99px;transition:width .7s cubic-bezier(.2,.8,.2,1),background .3s}
+.verdict{display:flex;align-items:center;justify-content:space-between;gap:10px;font-family:var(--mono);font-size:13px}
+.pill{font-family:var(--mono);font-size:12px;font-weight:500;padding:5px 10px;border-radius:999px;letter-spacing:.04em}
+.pill.ok{background:var(--good-soft)} .pill.no{background:var(--bad-soft)}
+.console-foot{display:flex;justify-content:space-between;gap:12px;padding:10px 16px;border-top:1px solid var(--line);font-size:11.5px;color:var(--muted);font-family:var(--mono)}
+.console-foot button{all:unset;cursor:pointer;color:var(--accent)}
+.console-foot button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* metrics strip */
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);border-block:1px solid var(--line)}
+.metric{padding:26px 22px;display:grid;gap:6px}
+.metric + .metric{border-left:1px solid var(--line)}
+.metric .v{font-family:var(--display);font-weight:800;font-size:clamp(34px,4.4vw,52px);letter-spacing:-.03em;line-height:1;font-variant-numeric:tabular-nums}
+.metric .v small{font-size:.45em;font-weight:600;color:var(--muted);margin-left:2px}
+.metric p{font-size:14px;color:var(--muted);line-height:1.4}
+
+/* sections */
+section.block{padding-block:clamp(64px,9vw,112px)}
+.head{display:flex;justify-content:space-between;align-items:end;gap:24px;flex-wrap:wrap;margin-bottom:40px}
+.head h2{font-size:clamp(36px,5.5vw,64px);font-weight:800;letter-spacing:-.035em}
+.head p{max-width:42ch;color:var(--muted)}
+
+/* projects */
+.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:16px}
+.proj{grid-column:span 3;background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);display:flex;flex-direction:column;overflow:hidden;transition:transform .2s ease,border-color .2s ease}
+.proj:hover{transform:translateY(-3px);border-color:var(--accent)}
+.proj.feature{grid-column:span 6;display:grid;grid-template-columns:1fr 1fr}
+.art{position:relative;min-height:200px;background:var(--surface-2);border-bottom:1px solid var(--line);overflow:hidden}
+.proj.feature .art{border-bottom:0;border-right:1px solid var(--line);min-height:340px}
+.art canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.art .tag{position:absolute;left:14px;top:14px;font-family:var(--mono);font-size:11px;padding:5px 9px;border-radius:6px;background:var(--surface);border:1px solid var(--line);color:var(--muted)}
+.art .big{position:absolute;right:16px;bottom:10px;font-family:var(--display);font-weight:800;font-size:clamp(44px,6vw,76px);letter-spacing:-.04em;line-height:1;color:var(--ink);opacity:.9}
+.proj-body{padding:22px;display:flex;flex-direction:column;gap:12px;flex:1}
+.proj h3{font-size:24px;font-weight:600;letter-spacing:-.02em}
+.proj.feature h3{font-size:clamp(28px,3.4vw,40px)}
+.proj p{color:var(--muted);font-size:15px}
+.stack{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto;padding-top:6px}
+.stack span{font-family:var(--mono);font-size:11.5px;padding:4px 8px;border-radius:6px;background:var(--surface-2);color:var(--ink)}
+.kv{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-block:4px}
+.kv div{border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.kv b{display:block;font-family:var(--display);font-size:22px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.kv span{font-size:12px;color:var(--muted)}
+
+/* experience */
+.xp{display:grid;gap:0;border-top:1px solid var(--line)}
+.job{display:grid;grid-template-columns:220px 1fr;gap:32px;padding-block:32px;border-bottom:1px solid var(--line)}
+.job .when{font-family:var(--mono);font-size:13px;color:var(--muted);display:grid;gap:4px;align-content:start}
+.job .when b{color:var(--ink);font-weight:500}
+.job h3{font-size:clamp(24px,3vw,32px);font-weight:600;letter-spacing:-.02em}
+.job .title{color:var(--accent);font-weight:500;margin-top:6px}
+.job ul{margin:14px 0 0;padding:0;list-style:none;display:grid;gap:10px;max-width:68ch}
+.job li{position:relative;padding-left:22px;color:var(--muted)}
+.job li::before{content:"→";position:absolute;left:0;color:var(--accent);font-family:var(--mono)}
+.job li strong{color:var(--ink);font-weight:600}
+
+/* skills */
+.skills{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+@media (max-width:900px){.skills{grid-template-columns:1fr 1fr}}
+@media (max-width:560px){.skills{grid-template-columns:1fr}}
+.skill{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:20px}
+.skill h3{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:500;margin-bottom:14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips span{font-size:14px;padding:6px 12px;border-radius:999px;border:1px solid var(--line)}
+
+/* edu + certs */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.panel{border:1px solid var(--line);border-radius:var(--radius);padding:24px;background:var(--surface);display:grid;gap:18px;align-content:start}
+.row{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.row h3{font-size:20px;font-weight:600;letter-spacing:-.01em}
+.row p{color:var(--muted);font-size:15px}
+.row .mono{font-size:13px;color:var(--muted);white-space:nowrap}
+.panel + .panel{}
+.cert{display:flex;gap:12px;align-items:baseline;padding-bottom:14px;border-bottom:1px dashed var(--line)}
+.cert:last-child{border-bottom:0;padding-bottom:0}
+.cert .mono{font-size:12px;color:var(--accent);min-width:28px}
+
+/* contact */
+.contact{background:var(--ink);color:var(--bg);border-radius:24px;padding:clamp(32px,6vw,72px);display:grid;gap:28px;margin-bottom:40px}
+.contact h2{font-size:clamp(40px,7vw,96px);font-weight:800;letter-spacing:-.045em;line-height:.95}
+.contact h2 span{color:var(--accent)}
+.contact p{color:color-mix(in srgb,var(--bg) 70%,var(--ink));max-width:52ch}
+.contact .links{display:flex;flex-wrap:wrap;gap:10px}
+.contact .btn{background:transparent;color:var(--bg);border-color:color-mix(in srgb,var(--bg) 30%,var(--ink))}
+.contact .btn:hover{border-color:var(--bg)}
+.contact .btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.email{font-family:var(--mono);font-size:clamp(16px,2.4vw,22px);user-select:all}
+footer{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding-block:24px 40px;font-family:var(--mono);font-size:12px;color:var(--muted)}
+
+/* motion */
+.rise{animation:rise .8s cubic-bezier(.2,.8,.2,1) both}
+.rise.d1{animation-delay:.08s}.rise.d2{animation-delay:.16s}.rise.d3{animation-delay:.24s}.rise.d4{animation-delay:.32s}
+@keyframes rise{from{transform:translateY(14px)}to{transform:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}html{scroll-behavior:auto}}
+
+/* responsive */
+@media (max-width:960px){
+  .hero{grid-template-columns:1fr}
+  .metrics{grid-template-columns:repeat(2,1fr)}
+  .metric:nth-child(3){border-left:0}
+  .metric:nth-child(n+3){border-top:1px solid var(--line)}
+  .proj.feature{grid-template-columns:1fr}
+  .proj.feature .art{border-right:0;border-bottom:1px solid var(--line);min-height:240px}
+  .two{grid-template-columns:1fr}
 }
-.glow-orb{position:fixed;width:600px;height:600px;border-radius:50%;background:radial-gradient(circle,rgba(245,166,35,0.06) 0%,transparent 70%);top:-200px;right:-100px;pointer-events:none;z-index:0;}
-.glow-orb2{position:fixed;width:400px;height:400px;border-radius:50%;background:radial-gradient(circle,rgba(74,158,255,0.05) 0%,transparent 70%);bottom:-100px;left:-100px;pointer-events:none;z-index:0;}
-
-/* TICKER */
-.ticker{background:var(--accent);color:#0D0F14;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.12em;padding:7px 0;overflow:hidden;white-space:nowrap;position:relative;z-index:10;}
-.ticker-inner{display:inline-block;animation:scrollticker 35s linear infinite}
-.ticker-inner span{margin:0 2.5rem}
-@keyframes scrollticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-
-/* HEADER */
-header{position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;padding:1.2rem 2.5rem;border-bottom:1px solid var(--line2);background:rgba(13,15,20,0.92);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);}
-.logo{display:flex;align-items:center;gap:10px}
-.logo-mark{width:34px;height:34px;background:var(--accent);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:18px;line-height:1;}
-.logo-text{font-family:var(--serif);font-size:19px;font-weight:700;letter-spacing:-0.02em;color:var(--text)}
-.logo-text span{color:var(--accent)}
-.header-right{display:flex;align-items:center;gap:12px}
-.status-dot{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;color:var(--text2);letter-spacing:0.05em;}
-.dot-live{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
-.version-tag{font-family:var(--mono);font-size:10px;color:var(--text3);border:1px solid var(--line2);padding:3px 8px;border-radius:4px;}
-
-/* HERO */
-.hero{position:relative;z-index:5;max-width:860px;margin:0 auto;padding:5rem 2rem 3.5rem;text-align:center;}
-.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(245,166,35,0.1);border:1px solid rgba(245,166,35,0.25);padding:6px 14px;border-radius:99px;font-family:var(--mono);font-size:11px;color:var(--accent);letter-spacing:0.08em;margin-bottom:2rem;}
-h1{font-family:var(--serif);font-size:clamp(44px,7vw,84px);font-weight:900;line-height:1;letter-spacing:-0.03em;margin-bottom:1.5rem;}
-h1 .line1{color:var(--text);display:block}
-h1 .line2{color:transparent;-webkit-text-stroke:1.5px var(--accent);display:block;}
-.hero-sub{font-size:17px;color:var(--text2);max-width:560px;margin:0 auto 2.5rem;line-height:1.75;}
-.doc-types{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:1rem;}
-.doc-type{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:11px;color:var(--text2);letter-spacing:0.05em;border:1px solid var(--line2);padding:6px 14px;border-radius:4px;background:var(--bg2);transition:border-color 0.15s,color 0.15s;}
-.doc-type:hover{border-color:var(--accent);color:var(--accent)}
-.trust-row{display:flex;gap:2rem;justify-content:center;margin-top:2.5rem;padding-top:2.5rem;border-top:1px solid var(--line);}
-.trust-stat{text-align:center}
-.trust-num{font-family:var(--serif);font-size:28px;font-weight:700;color:var(--accent);display:block;}
-.trust-label{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-top:2px;}
-
-/* LAYOUT */
-.app-layout{position:relative;z-index:5;max-width:1100px;margin:0 auto;padding:0 2rem 6rem;display:grid;grid-template-columns:1fr 1fr;gap:2rem;align-items:start;}
-@media(max-width:760px){.app-layout{grid-template-columns:1fr}}
-
-/* PANEL */
-.panel{background:var(--bg2);border:1px solid var(--line2);border-radius:var(--r);overflow:hidden;}
-.panel-header{display:flex;align-items:center;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--line);background:var(--bg3);}
-.panel-title{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--text2);letter-spacing:0.1em;text-transform:uppercase;display:flex;align-items:center;gap:8px;}
-.panel-title-dot{width:7px;height:7px;border-radius:50%;background:var(--accent)}
-.panel-body{padding:1.5rem}
-
-textarea{width:100%;min-height:260px;resize:vertical;background:var(--bg);border:1px solid var(--line2);border-radius:6px;padding:1rem 1.1rem;font-family:var(--mono);font-size:12.5px;color:var(--text);line-height:1.75;outline:none;transition:border-color 0.15s;}
-textarea:focus{border-color:var(--accent)}
-textarea::placeholder{color:var(--text3);line-height:1.8}
-.char-count{font-family:var(--mono);font-size:10px;color:var(--text3);text-align:right;margin-top:6px;letter-spacing:0.04em;}
-
-.samples-label{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin:1.2rem 0 8px;}
-.samples-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1.2rem;}
-.sample-btn{font-family:var(--mono);font-size:11px;padding:9px 10px;border:1px solid var(--line2);border-radius:5px;background:var(--bg3);color:var(--text2);cursor:pointer;text-align:left;transition:all 0.12s;line-height:1.4;display:flex;align-items:center;gap:6px;}
-.sample-btn:hover{border-color:var(--accent);color:var(--accent);background:rgba(245,166,35,0.06)}
-.sample-btn-icon{font-size:14px;flex-shrink:0}
-
-.analyze-btn{width:100%;padding:15px;background:var(--accent);color:#0D0F14;border:none;border-radius:6px;font-family:var(--sans);font-size:16px;font-weight:700;cursor:pointer;letter-spacing:-0.01em;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:8px;}
-.analyze-btn:hover{background:#f7b840;transform:translateY(-1px)}
-.analyze-btn:active{transform:translateY(0)}
-.analyze-btn:disabled{opacity:0.4;cursor:default;transform:none}
-
-/* LOADING */
-.loading-panel{display:none;background:var(--bg2);border:1px solid var(--line2);border-radius:var(--r);overflow:hidden;}
-.loading-body{padding:2rem}
-.loading-top{display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:13px;color:var(--text2);margin-bottom:1.5rem;}
-.spinner{width:18px;height:18px;flex-shrink:0;border:2px solid var(--line2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg)}}
-.skeleton-lines{display:flex;flex-direction:column;gap:10px}
-.skel{height:12px;border-radius:4px;background:linear-gradient(90deg,var(--bg3) 25%,var(--bg4) 50%,var(--bg3) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;}
-@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-
-/* RESULT */
-.result-panel{display:none;animation:fadeup 0.35s ease;}
-@keyframes fadeup{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
-
-.risk-meter-wrap{background:var(--bg2);border:1px solid var(--line2);border-radius:var(--r);padding:1.5rem;margin-bottom:1.25rem;}
-.risk-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.2rem;}
-.risk-verdict-label{font-family:var(--serif);font-size:26px;font-weight:700;line-height:1.1;margin-bottom:4px;}
-.risk-verdict-sub{font-family:var(--mono);font-size:11px;color:var(--text2);letter-spacing:0.04em;}
-.risk-score-badge{font-family:var(--serif);font-size:36px;font-weight:900;line-height:1;text-align:right;}
-.risk-score-label{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;text-align:right;margin-top:2px;}
-.risk-bar-track{height:8px;background:var(--bg4);border-radius:99px;overflow:hidden;margin-bottom:8px;}
-.risk-bar-fill{height:100%;border-radius:99px;transition:width 0.8s cubic-bezier(0.4,0,0.2,1);width:0%;}
-.risk-scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;color:var(--text3);}
-
-.summary-block{background:var(--bg2);border:1px solid var(--line2);border-radius:var(--r);padding:1.3rem 1.5rem;margin-bottom:1rem;}
-.block-eyebrow{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--text3);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
-.block-eyebrow::after{content:'';flex:1;height:1px;background:var(--line);}
-.summary-text{font-size:14.5px;color:var(--text);line-height:1.75}
-
-.flags-block{background:var(--bg2);border:1px solid var(--line2);border-radius:var(--r);padding:1.3rem 1.5rem;margin-bottom:1rem;}
-.flags-list{list-style:none;display:flex;flex-direction:column;gap:0;}
-.flag-item{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--line);}
-.flag-item:last-child{border-bottom:none;padding-bottom:0}
-.flag-item:first-child{padding-top:0}
-.flag-pill{flex-shrink:0;padding:3px 9px;border-radius:4px;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.06em;margin-top:2px;text-transform:uppercase;}
-.flag-pill.ok{background:rgba(45,212,160,0.12);color:var(--green)}
-.flag-pill.warn{background:rgba(255,82,82,0.12);color:var(--red)}
-.flag-pill.caution{background:rgba(255,193,7,0.12);color:var(--amber)}
-.flag-text{font-size:14px;color:var(--text);line-height:1.65}
-.flag-detail{font-size:12px;color:var(--text2);margin-top:3px;line-height:1.5}
-
-.questions-block{background:var(--bg2);border:1px solid var(--line2);border-radius:var(--r);padding:1.3rem 1.5rem;margin-bottom:1rem;}
-.questions-list{list-style:none;display:flex;flex-direction:column;gap:8px;}
-.question-item{display:flex;gap:10px;align-items:flex-start;font-size:13.5px;color:var(--text2);line-height:1.6;}
-.q-num{flex-shrink:0;width:20px;height:20px;border-radius:4px;background:var(--bg4);font-family:var(--mono);font-size:10px;font-weight:600;color:var(--text3);display:flex;align-items:center;justify-content:center;margin-top:2px;}
-
-.action-block{background:linear-gradient(135deg,rgba(245,166,35,0.08),rgba(255,107,53,0.05));border:1px solid rgba(245,166,35,0.2);border-radius:var(--r);padding:1.3rem 1.5rem;margin-bottom:1rem;}
-.action-block .block-eyebrow{color:var(--accent)}
-.action-block .block-eyebrow::after{background:rgba(245,166,35,0.2)}
-.action-text{font-size:15px;font-weight:600;color:var(--text);line-height:1.65}
-
-.result-actions{display:flex;gap:8px;margin-top:1rem;}
-.action-btn{flex:1;padding:10px;border-radius:5px;cursor:pointer;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;border:1px solid var(--line2);background:var(--bg3);color:var(--text2);transition:all 0.12s;display:flex;align-items:center;justify-content:center;gap:6px;}
-.action-btn:hover{border-color:var(--accent);color:var(--accent)}
-.action-btn.primary{background:rgba(245,166,35,0.1);border-color:rgba(245,166,35,0.3);color:var(--accent)}
-
-.empty-state{padding:3rem 1.5rem;text-align:center;border:1px dashed var(--line2);border-radius:var(--r);display:flex;flex-direction:column;align-items:center;}
-.empty-icon{font-size:40px;margin-bottom:1rem;opacity:0.4}
-.empty-text{font-family:var(--mono);font-size:12px;color:var(--text3);letter-spacing:0.06em}
-
-.how-box{margin-top:1.5rem;padding:1.2rem 1.5rem;background:var(--bg2);border:1px solid var(--line);border-radius:var(--r);}
-.how-label{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:12px;}
-.how-step{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px;}
-.how-step:last-of-type{margin-bottom:0}
-.step-num{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:rgba(245,166,35,0.15);border:1px solid rgba(245,166,35,0.3);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:10px;font-weight:600;color:var(--accent);margin-top:1px;}
-.step-text{font-size:13px;color:var(--text2);line-height:1.6}
-.disclaimer{margin-top:1rem;padding-top:1rem;border-top:1px solid var(--line);font-family:var(--mono);font-size:10px;color:var(--text3);}
-
-footer{position:relative;z-index:5;text-align:center;padding:2rem;border-top:1px solid var(--line);font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:0.06em;background:var(--bg);}
-
-/* INPUT TABS */
-.input-tabs{display:flex;gap:0;border-bottom:1px solid var(--line2);background:var(--bg3);}
-.itab{flex:1;padding:10px 8px;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);border:none;background:transparent;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;display:flex;align-items:center;justify-content:center;gap:6px;}
-.itab:hover{color:var(--text2)}
-.itab.active{color:var(--accent);border-bottom-color:var(--accent);background:rgba(245,166,35,0.05);}
-.itab-panel{display:none}.itab-panel.active{display:block}
-
-/* FILE DROP ZONE */
-.drop-zone{border:1.5px dashed var(--line3);border-radius:6px;padding:2rem 1rem;text-align:center;cursor:pointer;transition:all 0.15s;background:var(--bg);position:relative;}
-.drop-zone:hover,.drop-zone.dragover{border-color:var(--accent);background:rgba(245,166,35,0.04);}
-.drop-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
-.dz-icon{font-size:28px;margin-bottom:8px}
-.dz-label{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--text2);letter-spacing:0.06em;}
-.dz-sub{font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:4px;}
-.dz-types{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin-top:10px;}
-.dz-type{font-family:var(--mono);font-size:9px;color:var(--text3);border:1px solid var(--line2);padding:2px 8px;border-radius:3px;}
-
-/* OCR STATUS */
-.ocr-status{display:none;margin-top:10px;padding:10px 12px;border-radius:5px;font-family:var(--mono);font-size:11px;align-items:center;gap:8px;border:1px solid var(--line2);background:var(--bg3);}
-.ocr-status.loading{display:flex;color:var(--text2)}
-.ocr-status.done{display:flex;color:var(--green);border-color:rgba(45,212,160,0.2);background:rgba(45,212,160,0.05);}
-.ocr-status.error{display:flex;color:var(--red);border-color:rgba(255,82,82,0.2);background:rgba(255,82,82,0.05);}
-.ocr-spinner{width:12px;height:12px;flex-shrink:0;border:1.5px solid var(--line2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.7s linear infinite;}
-.file-preview{margin-top:8px;padding:8px 10px;border-radius:4px;background:var(--bg4);border:1px solid var(--line);display:none;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;color:var(--text2);}
-.file-preview.show{display:flex}
-.fp-name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.fp-clear{background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:0;flex-shrink:0;}
-.fp-clear:hover{color:var(--red)}
+@media (max-width:700px){
+  .proj{grid-column:span 6}
+  .job{grid-template-columns:1fr;gap:12px}
+  .kv{grid-template-columns:1fr 1fr 1fr}
+  .kv b{font-size:18px}
+}
+@media (max-width:420px){
+  .metrics{grid-template-columns:1fr}
+  .metric + .metric{border-left:0;border-top:1px solid var(--line)}
+}
 </style>
-</head>
-<body>
-<div class="glow-orb"></div>
-<div class="glow-orb2"></div>
+</head><body>
 
-<div class="ticker">
-  <div class="ticker-inner">
-    <span>⚖ "AT WILL" MEANS THEY CAN FIRE YOU TOMORROW, NO REASON NEEDED</span>
-    <span>🔴 "PERPETUAL IRREVOCABLE LICENSE" = THEY OWN YOUR CONTENT FOREVER</span>
-    <span>⚠ "WE MAY CHANGE TERMS AT ANY TIME" = ZERO NOTICE REQUIRED</span>
-    <span>💀 "LIQUIDATED DAMAGES" = A PENALTY THEY WROTE THEMSELVES</span>
-    <span>🔴 "NON-COMPETE 500 MILES" IS OFTEN UNENFORCEABLE — BUT STILL TERRIFYING</span>
-    <span>⚠ "NORMAL WEAR AND TEAR" MEANS WHATEVER YOUR LANDLORD WANTS IT TO MEAN</span>
-    <span>⚖ "AT WILL" MEANS THEY CAN FIRE YOU TOMORROW, NO REASON NEEDED</span>
-    <span>🔴 "PERPETUAL IRREVOCABLE LICENSE" = THEY OWN YOUR CONTENT FOREVER</span>
-    <span>⚠ "WE MAY CHANGE TERMS AT ANY TIME" = ZERO NOTICE REQUIRED</span>
-    <span>💀 "LIQUIDATED DAMAGES" = A PENALTY THEY WROTE THEMSELVES</span>
-    <span>🔴 "NON-COMPETE 500 MILES" IS OFTEN UNENFORCEABLE — BUT STILL TERRIFYING</span>
-    <span>⚠ "NORMAL WEAR AND TEAR" MEANS WHATEVER YOUR LANDLORD WANTS IT TO MEAN</span>
+<nav class="nav" aria-label="Primary">
+  <div class="wrap">
+    <a class="logo" href="#top">aaranya<span>.</span></a>
+    <ul>
+      <li><a href="#work">Work</a></li>
+      <li><a href="#experience">Experience</a></li>
+      <li><a href="#skills">Skills</a></li>
+      <li><a href="#education">Education</a></li>
+    </ul>
+    <a class="btn primary" href="#contact">Get in touch</a>
   </div>
-</div>
+</nav>
 
-<header>
-  <div class="logo">
-    <div class="logo-mark" style="font-size:16px;">⚖️</div>
-    <div class="logo-text">Is This <span>Normal?</span></div>
-  </div>
-  <div class="header-right">
-    <div class="status-dot"><div class="dot-live"></div>AI ONLINE</div>
-    <div class="version-tag">v2.0</div>
-  </div>
-</header>
-
-<section class="hero">
-  <div class="hero-badge"><span>⚡</span> PLAIN-ENGLISH LEGAL DECODER</div>
-  <h1>
-    <span class="line1">Legal documents,</span>
-    <span class="line2">finally decoded.</span>
-  </h1>
-  <p class="hero-sub">Paste any contract, rental agreement, job offer, or terms of service. Get a blunt risk score, plain-English breakdown, red flags, and the exact questions to ask before you sign.</p>
-  <div class="doc-types">
-    <span class="doc-type">📋 Terms & Conditions</span>
-    <span class="doc-type">🏠 Rental Agreements</span>
-    <span class="doc-type">💼 Job Offers</span>
-    <span class="doc-type">🔒 Privacy Policies</span>
-    <span class="doc-type">🤝 NDAs</span>
-    <span class="doc-type">📜 Any Contract</span>
-  </div>
-  <div class="trust-row">
-    <div class="trust-stat"><span class="trust-num">0 lawyers</span><span class="trust-label">required</span></div>
-    <div class="trust-stat"><span class="trust-num">&lt; 10 sec</span><span class="trust-label">analysis time</span></div>
-    <div class="trust-stat"><span class="trust-num">100% free</span><span class="trust-label">no sign-up</span></div>
-  </div>
-</section>
-
-<div class="app-layout">
-  <!-- LEFT -->
-  <div>
-    <div class="panel">
-      <div class="panel-header">
-        <div class="panel-title"><div class="panel-title-dot"></div>INPUT DOCUMENT</div>
-        <span style="font-family:var(--mono);font-size:10px;color:var(--text3)">3 WAYS TO ADD</span>
-      </div>
-
-      <!-- TABS -->
-      <div class="input-tabs">
-        <button class="itab active" onclick="switchTab('paste')">✏️ Paste Text</button>
-        <button class="itab" onclick="switchTab('file')">📄 Upload File</button>
-        <button class="itab" onclick="switchTab('image')">🖼 Scan Image</button>
-      </div>
-
-      <div class="panel-body">
-
-        <!-- TAB: PASTE -->
-        <div class="itab-panel active" id="tab-paste">
-          <textarea id="textInput" oninput="updateCharCount(this)"
-            placeholder="Paste a clause, paragraph, or the full document here...
-
-Tips:
-→ Even one suspicious sentence is enough
-→ Copy-paste straight from a PDF or email
-→ The AI will catch what you missed
-
-(We've seen worse. Much worse.)"></textarea>
-          <div class="char-count" id="charCount">0 characters</div>
-        </div>
-
-        <!-- TAB: FILE UPLOAD -->
-        <div class="itab-panel" id="tab-file">
-          <div class="drop-zone" id="fileDropZone" ondragover="dzDrag(event,'fileDropZone')" ondragleave="dzLeave('fileDropZone')" ondrop="dzDropFile(event)">
-            <input type="file" id="fileInput" accept=".txt,.pdf,.doc,.docx" onchange="handleFileUpload(this.files[0])"/>
-            <div class="dz-icon">📂</div>
-            <div class="dz-label">DROP FILE HERE OR CLICK TO BROWSE</div>
-            <div class="dz-sub">Text will be extracted automatically</div>
-            <div class="dz-types">
-              <span class="dz-type">TXT</span>
-              <span class="dz-type">PDF</span>
-              <span class="dz-type">DOC</span>
-              <span class="dz-type">DOCX</span>
-            </div>
-          </div>
-          <div class="file-preview" id="filePreview">
-            <span>📄</span>
-            <span class="fp-name" id="fileName">—</span>
-            <button class="fp-clear" onclick="clearFile()" title="Remove">✕</button>
-          </div>
-          <div class="ocr-status" id="fileStatus"></div>
-        </div>
-
-        <!-- TAB: IMAGE OCR -->
-        <div class="itab-panel" id="tab-image">
-          <div class="drop-zone" id="imgDropZone" ondragover="dzDrag(event,'imgDropZone')" ondragleave="dzLeave('imgDropZone')" ondrop="dzDropImg(event)">
-            <input type="file" id="imageInput" accept="image/*" onchange="handleImageUpload(this.files[0])"/>
-            <div class="dz-icon">🔍</div>
-            <div class="dz-label">DROP IMAGE HERE OR CLICK TO BROWSE</div>
-            <div class="dz-sub">AI reads text from screenshots & photos</div>
-            <div class="dz-types">
-              <span class="dz-type">PNG</span>
-              <span class="dz-type">JPG</span>
-              <span class="dz-type">WEBP</span>
-              <span class="dz-type">HEIC</span>
-            </div>
-          </div>
-          <div class="file-preview" id="imgPreview">
-            <span>🖼</span>
-            <span class="fp-name" id="imgName">—</span>
-            <button class="fp-clear" onclick="clearImg()" title="Remove">✕</button>
-          </div>
-          <div class="ocr-status" id="imgStatus"></div>
-          <div id="imgThumb" style="display:none;margin-top:8px;border-radius:5px;overflow:hidden;max-height:120px;border:1px solid var(--line2);">
-            <img id="imgPreviewEl" style="width:100%;max-height:120px;object-fit:cover;display:block;"/>
-          </div>
-        </div>
-
-        <!-- SHARED: SAMPLES + BUTTON -->
-        <div class="samples-label" style="margin-top:1.2rem">TRY A SAMPLE →</div>
-        <div class="samples-grid">
-          <button class="sample-btn" onclick="loadSample('rent')"><span class="sample-btn-icon">🏠</span>Sketchy rental</button>
-          <button class="sample-btn" onclick="loadSample('tos')"><span class="sample-btn-icon">📱</span>Big tech T&amp;C</button>
-          <button class="sample-btn" onclick="loadSample('job')"><span class="sample-btn-icon">💼</span>Trap job offer</button>
-          <button class="sample-btn" onclick="loadSample('nda')"><span class="sample-btn-icon">🤫</span>Aggressive NDA</button>
-        </div>
-
-        <button class="analyze-btn" id="analyzeBtn" onclick="analyze()">
-          Decode this document
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="#0D0F14" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </button>
+<main class="wrap" id="top">
+  <header class="hero">
+    <div>
+      <span class="status rise"><span class="dot"></span>Open to 2027 roles and internships · Chennai</span>
+      <h1 class="name rise d1">Aaranya<span class="l2">Sharma</span></h1>
+      <p class="role rise d2">I build systems that <em>check what AI says</em> before anyone trusts it.</p>
+      <p class="lede rise d3">Computer Science at SRM (2027). Cybersecurity research intern at DRDO, where I built a threat-intelligence validator that blocked every adversarial claim thrown at it. Before that I ran inventory databases at FindYourKicks. Python, SQL and database-driven design, from security research to IoT.</p>
+      <div class="cta rise d4">
+        <a class="btn primary" href="#work">See the work ↓</a>
+        <a class="btn" href="https://github.com/whosvegito" target="_blank" rel="noopener">GitHub ↗</a>
+        <a class="btn" href="https://www.linkedin.com/in/aaranya-sharma-65a343290" target="_blank" rel="noopener">LinkedIn ↗</a>
       </div>
     </div>
 
-    <div class="how-box">
-      <div class="how-label">HOW IT WORKS</div>
-      <div class="how-step"><div class="step-num">1</div><div class="step-text">Paste any legal text — one clause or the whole document</div></div>
-      <div class="how-step"><div class="step-num">2</div><div class="step-text">AI reads every word and assigns a 0–100 risk score</div></div>
-      <div class="how-step"><div class="step-num">3</div><div class="step-text">Get flags, plain-English explanation, and questions to ask before signing</div></div>
-      <div class="disclaimer">⚠ Not a substitute for a real lawyer. For large contracts ($10k+), still get one.</div>
-    </div>
-  </div>
-
-  <!-- RIGHT -->
-  <div>
-    <div class="loading-panel" id="loadingPanel">
-      <div class="panel-header">
-        <div class="panel-title"><div class="panel-title-dot" style="background:var(--blue)"></div>ANALYZING</div>
-      </div>
-      <div class="loading-body">
-        <div class="loading-top"><div class="spinner"></div><span id="loadingMsg" style="font-size:12px">Reading the fine print so you don't have to...</span></div>
-        <div class="skeleton-lines">
-          <div class="skel" style="width:80%"></div>
-          <div class="skel" style="width:60%"></div>
-          <div class="skel" style="width:90%"></div>
-          <div class="skel" style="width:45%"></div>
-          <div class="skel" style="width:70%"></div>
+    <aside class="console rise d2" aria-label="HalluciSTIX claim check demo">
+      <div class="console-head"><span><b>hallucistix</b> / validate</span><span>STIX 2.1 · ATT&amp;CK</span></div>
+      <div class="console-body">
+        <div>
+          <div class="claim-label">AI-generated claim</div>
+          <p class="claim" id="claim" aria-live="polite"></p>
+        </div>
+        <div class="checks" id="checks"></div>
+        <div>
+          <div class="verdict"><span>confidence <b id="score" class="mono">0.000</b></span><span class="pill" id="pill">…</span></div>
+          <div class="meter" style="margin-top:8px"><i id="bar"></i></div>
         </div>
       </div>
+      <div class="console-foot"><span>Example claims · illustrative scores</span><button type="button" id="next">next claim →</button></div>
+    </aside>
+  </header>
+
+  <div class="metrics" aria-label="Results">
+    <div class="metric"><div class="v">100<small>/100</small></div><p>adversarial AI threat claims blocked at DRDO</p></div>
+    <div class="metric"><div class="v">0.712</div><p>confidence gap between verified and fabricated claims</p></div>
+    <div class="metric"><div class="v">0.09<small>ms</small></div><p>ChaCha20 encryption latency on ESP32 LoRa links</p></div>
+    <div class="metric"><div class="v">50<small>%</small></div><p>less manual reporting after automating SQL workflows</p></div>
+  </div>
+
+  <section class="block" id="work">
+    <div class="head">
+      <h2>Selected work</h2>
+      <p>Security research, embedded crypto, distributed data and firmware. Each one shipped with numbers attached.</p>
     </div>
 
-    <div class="empty-state" id="emptyState">
-      <div class="empty-icon">⚖</div>
-      <div class="empty-text">PASTE A DOCUMENT ON THE LEFT TO BEGIN</div>
-      <div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:6px">analysis appears here</div>
-    </div>
-
-    <div class="result-panel" id="resultPanel">
-      <div class="risk-meter-wrap">
-        <div class="risk-header">
-          <div>
-            <div class="risk-verdict-label" id="verdictLabel">—</div>
-            <div class="risk-verdict-sub" id="verdictSub">—</div>
+    <div class="grid">
+      <article class="proj feature">
+        <div class="art"><canvas data-art="graph"></canvas><span class="tag">MITRE ATT&amp;CK knowledge graph</span><span class="big">1,927</span></div>
+        <div class="proj-body">
+          <span class="eyebrow">Featured · DRDO research</span>
+          <h3>HalluciSTIX</h3>
+          <p>A locally-running neuro-symbolic system that catches AI hallucinations in cyber threat intelligence. Every claim an LLM makes is checked against a MITRE ATT&amp;CK knowledge graph before it reaches an analyst. Documented in a full IEEE-format research paper.</p>
+          <div class="kv">
+            <div><b>1.000</b><span>precision</span></div>
+            <div><b>0.933</b><span>recall</span></div>
+            <div><b>18,880</b><span>graph edges</span></div>
           </div>
-          <div>
-            <div class="risk-score-badge" id="riskScore">—</div>
-            <div class="risk-score-label">RISK SCORE /100</div>
-          </div>
+          <div class="stack"><span>Llama 3.1 8B</span><span>Flask</span><span>NetworkX</span><span>STIX 2.1</span><span>MITRE ATT&amp;CK</span></div>
         </div>
-        <div class="risk-bar-track"><div class="risk-bar-fill" id="riskBar"></div></div>
-        <div class="risk-scale"><span>LOW RISK</span><span>MEDIUM</span><span>HIGH RISK</span></div>
-      </div>
+      </article>
 
-      <div class="summary-block">
-        <div class="block-eyebrow">What this actually means</div>
-        <div class="summary-text" id="summaryText"></div>
-      </div>
+      <article class="proj">
+        <div class="art"><canvas data-art="lora"></canvas><span class="tag">ESP32 · SX1278</span><span class="big">0.09ms</span></div>
+        <div class="proj-body">
+          <span class="eyebrow">Embedded security</span>
+          <h3>Secure LoRa IoT Link</h3>
+          <p>Lightweight ChaCha20 encryption with X25519 key exchange for LoRa radio. A persistent nonce system gives 100% replay-attack protection.</p>
+          <div class="stack"><span>ESP32</span><span>ChaCha20</span><span>X25519</span><span>Python</span></div>
+        </div>
+      </article>
 
-      <div class="flags-block">
-        <div class="block-eyebrow">Clause breakdown</div>
-        <ul class="flags-list" id="flagsList"></ul>
-      </div>
+      <article class="proj">
+        <div class="art"><canvas data-art="cluster"></canvas><span class="tag">Spark MLlib vs scikit-learn</span><span class="big">+35%</span></div>
+        <div class="proj-body">
+          <span class="eyebrow">Distributed data</span>
+          <h3>Health Risk Clustering</h3>
+          <p>EDA on large-scale health datasets, then a scikit-learn baseline benchmarked against a Spark MLlib pipeline: 35% better accuracy and 40% less processing time at scale.</p>
+          <div class="stack"><span>PySpark</span><span>Spark</span><span>Pandas</span><span>NumPy</span><span>scikit-learn</span></div>
+        </div>
+      </article>
 
-      <div class="questions-block" id="questionsBlock">
-        <div class="block-eyebrow">Ask before you sign</div>
-        <ul class="questions-list" id="questionsList"></ul>
-      </div>
+      <article class="proj">
+        <div class="art"><canvas data-art="uptime"></canvas><span class="tag">ESP8266 firmware</span><span class="big">99.2%</span></div>
+        <div class="proj-body">
+          <span class="eyebrow">IoT hardware</span>
+          <h3>IoT Pet Treat Dispenser</h3>
+          <p>99.2% uptime and 45% faster device response, from reworked interrupt handling and fail-safe reconnection logic.</p>
+          <div class="stack"><span>ESP8266</span><span>Embedded C</span></div>
+        </div>
+      </article>
 
-      <div class="action-block">
-        <div class="block-eyebrow">Bottom line</div>
-        <div class="action-text" id="bottomLine"></div>
-      </div>
-
-      <div class="result-actions">
-        <button class="action-btn primary" onclick="copyResult()">
-          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><rect x="5" y="5" width="9" height="9" rx="1.5" stroke="currentColor" stroke-width="1.5"/><path d="M11 5V3.5A1.5 1.5 0 009.5 2h-6A1.5 1.5 0 002 3.5v6A1.5 1.5 0 003.5 11H5" stroke="currentColor" stroke-width="1.5"/></svg>
-          COPY
-        </button>
-        <button class="action-btn" onclick="showQuickSummary()" id="summaryBtn">
-          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h8M2 12h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-          QUICK SUMMARY
-        </button>
-        <button class="action-btn" onclick="resetAll()">
-          <svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M13 3L8 8m0 0L3 13M8 8L3 3m5 5l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-          NEW
-        </button>
-      </div>
+      <article class="proj">
+        <div class="art"><canvas data-art="bars"></canvas><span class="tag">SQL + Excel automation</span><span class="big">−50%</span></div>
+        <div class="proj-body">
+          <span class="eyebrow">Industry · FindYourKicks</span>
+          <h3>Inventory Reporting Pipeline</h3>
+          <p>Automated reporting on top of a scalable inventory database, halving manual effort and feeding sales and marketing decisions.</p>
+          <div class="stack"><span>SQL</span><span>MySQL</span><span>Excel</span><span>Data analysis</span></div>
+        </div>
+      </article>
     </div>
-  </div>
-</div>
+  </section>
 
-<footer>
-  is this normal? &nbsp;·&nbsp; not legal advice &nbsp;·&nbsp; for informational purposes only<br/>
-  <span style="margin-top:4px;display:block">if something looks really bad — talk to a real lawyer</span>
-</footer>
-
-<!-- QUICK SUMMARY MODAL -->
-<div id="summaryModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;align-items:center;justify-content:center;padding:1.5rem;">
-  <div style="background:var(--bg2);border:1px solid var(--line3);border-radius:12px;max-width:520px;width:100%;max-height:80vh;overflow-y:auto;">
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:1rem 1.4rem;border-bottom:1px solid var(--line2);">
-      <div style="font-family:var(--mono);font-size:11px;font-weight:600;color:var(--accent);letter-spacing:0.1em;">QUICK SUMMARY</div>
-      <button onclick="closeSummaryModal()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;padding:0;line-height:1;">✕</button>
+  <section class="block" id="experience" style="padding-top:0">
+    <div class="head">
+      <h2>Experience</h2>
+      <p>Defence research and a year inside a fast-moving sneaker retailer.</p>
     </div>
-    <div style="padding:1.4rem;">
-      <div id="modalSummaryLoading" style="display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:12px;color:var(--text2);">
-        <div class="spinner"></div> Generating summary...
-      </div>
-      <div id="modalSummaryContent" style="display:none;">
-        <div style="font-family:var(--serif);font-size:22px;font-weight:700;color:var(--text);margin-bottom:1rem;line-height:1.2;" id="modalTitle"></div>
-        <div style="font-size:14px;color:var(--text2);line-height:1.8;" id="modalBody"></div>
-        <div style="margin-top:1.2rem;padding-top:1.2rem;border-top:1px solid var(--line);display:flex;gap:8px;">
-          <button onclick="copySummaryModal()" style="flex:1;padding:9px;border-radius:5px;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;border:1px solid rgba(245,166,35,0.3);background:rgba(245,166,35,0.1);color:var(--accent);cursor:pointer;" id="copyModalBtn">COPY</button>
-          <button onclick="closeSummaryModal()" style="flex:1;padding:9px;border-radius:5px;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;border:1px solid var(--line2);background:var(--bg3);color:var(--text2);cursor:pointer;">CLOSE</button>
+    <div class="xp">
+      <div class="job">
+        <div class="when"><b>Jun – Jul 2026</b><span>Chennai, India</span></div>
+        <div>
+          <h3>DRDO, Ministry of Defence</h3>
+          <div class="title">Cybersecurity Research Intern</div>
+          <ul>
+            <li>Built <strong>HalluciSTIX</strong>, a validation pipeline on STIX 2.1 and MITRE ATT&amp;CK that blocked <strong>100/100</strong> adversarial AI-generated threat claims, with <strong>0.712</strong> confidence-score separation on real attack data.</li>
+            <li>Authored a full IEEE-format research paper on the system's architecture, validation method and results.</li>
+          </ul>
         </div>
       </div>
+      <div class="job">
+        <div class="when"><b>Sep 2024 – Nov 2025</b><span>Chennai, India</span></div>
+        <div>
+          <h3>FindYourKicks India Ltd</h3>
+          <div class="title">Inventory Manager, Database Engineer &amp; Product Marketing Associate</div>
+          <ul>
+            <li>Automated SQL and Excel reporting for a scalable inventory database, cutting manual reporting effort by <strong>50%</strong>.</li>
+            <li>Analysed operational and sales data into business-facing reports that drove marketing and inventory decisions.</li>
+          </ul>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
+  </section>
+
+  <section class="block" id="skills" style="padding-top:0">
+    <div class="head">
+      <h2>Toolkit</h2>
+      <p>What I reach for, grouped by the kind of problem.</p>
+    </div>
+    <div class="skills">
+      <div class="skill"><h3>Languages &amp; data</h3><div class="chips"><span>Python</span><span>SQL</span><span>Pandas</span><span>NumPy</span><span>Excel</span><span>Data visualisation</span></div></div>
+      <div class="skill"><h3>Databases</h3><div class="chips"><span>MySQL</span><span>MongoDB</span><span>Schema design</span><span>Query optimisation</span></div></div>
+      <div class="skill"><h3>Cloud &amp; systems</h3><div class="chips"><span>AWS</span><span>Spark</span><span>PySpark</span><span>Hadoop</span><span>Distributed systems</span></div></div>
+      <div class="skill"><h3>IoT &amp; embedded</h3><div class="chips"><span>ESP32</span><span>Arduino</span><span>LoRa SX1278</span><span>Embedded C</span></div></div>
+      <div class="skill"><h3>Security</h3><div class="chips"><span>STIX 2.1</span><span>MITRE ATT&amp;CK</span><span>ChaCha20</span><span>X25519</span><span>Threat intel</span></div></div>
+      <div class="skill"><h3>Core &amp; tools</h3><div class="chips"><span>Git</span><span>Flask</span><span>REST APIs</span><span>DBMS</span><span>OS</span><span>DSA</span></div></div>
+    </div>
+  </section>
+
+  <section class="block" id="education" style="padding-top:0">
+    <div class="two">
+      <div class="panel">
+        <span class="eyebrow">Education</span>
+        <div class="row"><div><h3>SRM Institute of Science and Technology</h3><p>B.Tech, Computer Science and Engineering · CGPA 7.59/10</p></div><span class="mono">2023 – 2027</span></div>
+        <div class="row"><div><h3>KC International School, Jammu</h3><p>CBSE Class XII 81% · Class X 85%</p></div><span class="mono">2023 / 2021</span></div>
+      </div>
+      <div class="panel">
+        <span class="eyebrow">Certifications</span>
+        <div class="cert"><span class="mono">01</span><div>MongoDB Associate Developer <span style="color:var(--muted)">· MongoDB University</span></div></div>
+        <div class="cert"><span class="mono">02</span><div>Cloud Foundations <span style="color:var(--muted)">· AWS Educate</span></div></div>
+        <div class="cert"><span class="mono">03</span><div>Networking Basics <span style="color:var(--muted)">· Cisco Networking Academy</span></div></div>
+        <div class="cert"><span class="mono">04</span><div>Digital Communication &amp; Marketing <span style="color:var(--muted)">· HubSpot Academy</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="contact" id="contact">
+    <span class="eyebrow" style="color:inherit;opacity:.6">Contact</span>
+    <h2>Let's build something <span>verifiable.</span></h2>
+    <p>Hiring for security, data or systems roles? I reply fast.</p>
+    <div class="email" id="email">axrxnxa@gmail.com</div>
+    <div class="links">
+      <button class="btn primary" type="button" id="copy">Copy email</button>
+      <a class="btn" href="https://www.linkedin.com/in/aaranya-sharma-65a343290" target="_blank" rel="noopener">LinkedIn ↗</a>
+      <a class="btn" href="https://github.com/whosvegito" target="_blank" rel="noopener">GitHub ↗</a>
+    </div>
+  </section>
+
+  <footer><span>© 2026 Aaranya Sharma</span><span>Chennai · Jammu</span></footer>
+</main>
 
 <script>
-const samples={
-  rent:`The Landlord reserves the right to enter the premises at any time without prior notice for inspection, repairs, or any purpose the Landlord deems necessary. Tenant hereby waives all rights to privacy during the duration of tenancy. A late fee of $150 will be charged for any rent received after the 2nd of the month, in addition to a $50 administrative processing fee per day until payment is received. Tenant is responsible for all damages including normal wear and tear. Landlord may terminate this agreement with 24 hours notice for any reason.`,
-  tos:`By using this Service, you grant the Company a perpetual, irrevocable, worldwide, royalty-free, sublicensable and transferable license to use, copy, reproduce, process, adapt, modify, publish, transmit, display and distribute any content you submit. We may share your personal data, location, usage patterns, and behavioral profiles with third-party advertising and analytics partners. We reserve the right to modify these terms at any time without direct notice to you. Continued use constitutes acceptance. You waive the right to participate in class action lawsuits against us.`,
-  job:`This employment is at-will and may be terminated by either party at any time without cause or notice. You agree to assign all inventions, improvements, discoveries, or intellectual property made during employment — including those made on your personal time and with personal equipment — to the Company. You agree not to work for, consult, or have any business relationship with any competitor in any capacity for 24 months after separation within a 500-mile radius. All overtime is expected and is considered already compensated by your annual salary. The Company may change your role, compensation, or reporting structure at any time.`,
-  nda:`You agree to keep all information disclosed by the Company strictly confidential for a period of 10 years. "Confidential Information" means any and all information in any form whatsoever. You agree not to make any public statement, social media post, review, or disclosure of any kind about the Company, its products, employees, culture, or practices, even after termination. Breach of this agreement may result in injunctive relief and liquidated damages of no less than $500,000 per incident. This agreement is governed by the laws of Delaware regardless of where you reside.`
-};
-const loadingMessages=["Reading the fine print so you don't have to...","Translating lawyer-speak to plain English...","Scanning for the clause they really don't want you to notice...","Cross-referencing with 'things normal people don't agree to'...","Calculating your risk score...","Almost done — just untangling the last bit..."];
+(function(){
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-function updateCharCount(el){document.getElementById('charCount').textContent=el.value.length.toLocaleString()+' characters';}
-function loadSample(k){const ta=document.getElementById('textInput');ta.value=samples[k];updateCharCount(ta);hideResults();}
-function hideResults(){document.getElementById('resultPanel').style.display='none';document.getElementById('loadingPanel').style.display='none';document.getElementById('emptyState').style.display='flex';}
-function resetAll(){document.getElementById('textInput').value='';updateCharCount(document.getElementById('textInput'));hideResults();document.getElementById('emptyState').querySelector('.empty-text').textContent='PASTE A DOCUMENT ON THE LEFT TO BEGIN';}
-function getRiskColor(s){if(s<=33)return'#2DD4A0';if(s<=65)return'#FFC107';return'#FF5252';}
-
-async function analyze(){
-  const text=document.getElementById('textInput').value.trim();
-  if(!text){document.getElementById('textInput').style.borderColor='var(--red)';setTimeout(()=>document.getElementById('textInput').style.borderColor='',800);return;}
-  const btn=document.getElementById('analyzeBtn');
-  const loading=document.getElementById('loadingPanel');
-  const empty=document.getElementById('emptyState');
-  const result=document.getElementById('resultPanel');
-  const lmsg=document.getElementById('loadingMsg');
-  btn.disabled=true;result.style.display='none';empty.style.display='none';loading.style.display='block';
-  let mi=0;const iv=setInterval(()=>{mi=(mi+1)%loadingMessages.length;lmsg.textContent=loadingMessages[mi];},2000);
-  try{
-    const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
-      model:"claude-sonnet-4-20250514",max_tokens:1200,
-      system:`You are a sharp, direct legal analyst for "Is This Normal?" — a tool that helps regular people understand documents before signing. You have expertise in contract law, employment law, rental law, and consumer protection. Be warm, direct, slightly witty but never flippant.
-
-Return ONLY valid JSON (no markdown, no backticks, no extra text):
-{
-  "verdict": "safe" | "caution" | "danger",
-  "verdict_label": "Looks standard" | "Read carefully" | "Raise your eyebrows",
-  "verdict_sub": "One witty but accurate sentence about this document's overall vibe",
-  "risk_score": <integer 0-100>,
-  "summary": "2-3 sentences in conversational English about what this means for the person signing. Be specific to THIS document.",
-  "flags": [
-    {
-      "type": "ok" | "warn" | "caution",
-      "label": "NORMAL" | "RED FLAG" | "WATCH OUT",
-      "text": "What this clause means in plain English",
-      "detail": "Why this matters and what the real-world implication is"
-    }
-  ],
-  "questions": ["Specific question to ask the other party before signing"],
-  "bottom_line": "One direct sentence: what should this person DO right now?"
-}
-Risk score: 0-20=very standard, 21-40=mostly fine, 41-65=negotiate these points, 66-85=several red flags, 86-100=seriously problematic.
-Max 5 flags, 3 questions. Be SPECIFIC to what was pasted. If a clause is predatory, say so plainly.`,
-      messages:[{role:"user",content:text}]
-    })});
-    const data=await res.json();
-    const raw=(data.content||[]).map(b=>b.text||'').join('');
-    const p=JSON.parse(raw.replace(/```json|```/g,'').trim());
-    clearInterval(iv);loading.style.display='none';
-
-    const sc=getRiskColor(p.risk_score||0);
-    const vc={'safe':'#2DD4A0','caution':'#FFC107','danger':'#FF5252'}[p.verdict]||'#FFC107';
-    document.getElementById('verdictLabel').textContent=p.verdict_label||'—';
-    document.getElementById('verdictLabel').style.color=vc;
-    document.getElementById('verdictSub').textContent=p.verdict_sub||'';
-    document.getElementById('riskScore').textContent=p.risk_score||'—';
-    document.getElementById('riskScore').style.color=sc;
-    const bar=document.getElementById('riskBar');
-    bar.style.background=`linear-gradient(90deg,#2DD4A0,${sc})`;
-    setTimeout(()=>bar.style.width=(p.risk_score||0)+'%',100);
-    document.getElementById('summaryText').textContent=p.summary||'';
-
-    document.getElementById('flagsList').innerHTML=(p.flags||[]).map(f=>`
-      <li class="flag-item">
-        <span class="flag-pill ${f.type==='ok'?'ok':f.type==='caution'?'caution':'warn'}">${f.label||f.type}</span>
-        <div><div class="flag-text">${f.text}</div>${f.detail?`<div class="flag-detail">${f.detail}</div>`:''}</div>
-      </li>`).join('');
-
-    const qs=p.questions||[];
-    if(qs.length){
-      document.getElementById('questionsList').innerHTML=qs.map((q,i)=>`<li class="question-item"><span class="q-num">${i+1}</span><span>${q}</span></li>`).join('');
-      document.getElementById('questionsBlock').style.display='block';
-    }else{document.getElementById('questionsBlock').style.display='none';}
-
-    document.getElementById('bottomLine').textContent=p.bottom_line||'';
-    result.style.display='block';
-    result.scrollIntoView({behavior:'smooth',block:'nearest'});
-  }catch(err){
-    clearInterval(iv);loading.style.display='none';
-    empty.style.display='flex';
-    empty.querySelector('.empty-text').textContent='SOMETHING WENT WRONG. TRY AGAIN.';
-    console.error(err);
+  /* ---------- claim validator demo ---------- */
+  const claims = [
+    {t:'T1059.001 is PowerShell, under the Execution tactic.', c:[['technique id exists',1],['name matches node',1],['tactic edge exists',1]], s:0.94},
+    {t:'T1566.004 is Spearphishing via QR Code.', c:[['technique id exists',1],['name matches node',0],['tactic edge exists',1]], s:0.21},
+    {t:'T1003.001 dumps credentials from LSASS memory.', c:[['technique id exists',1],['name matches node',1],['parent T1003 linked',1]], s:0.91},
+    {t:'T1999 Quantum Key Harvesting targets TLS sessions.', c:[['technique id exists',0],['name matches node',0],['tactic edge exists',0]], s:0.04}
+  ];
+  const $ = id => document.getElementById(id);
+  let i = 0, timer = null, typing = null;
+  function render(k){
+    const cl = claims[k];
+    clearTimeout(timer); clearInterval(typing);
+    const el = $('claim'), checks = $('checks'), bar = $('bar'), pill = $('pill'), score = $('score');
+    checks.innerHTML = ''; bar.style.width = '0'; pill.textContent = 'checking'; pill.className = 'pill'; score.textContent = '0.000';
+    let n = 0;
+    const done = () => {
+      el.textContent = cl.t;
+      cl.c.forEach((row, j) => setTimeout(() => {
+        const d = document.createElement('div'); d.className = 'check';
+        d.innerHTML = '<span>' + row[0] + '</span><span class="' + (row[1] ? 'ok' : 'no') + '">' + (row[1] ? 'pass' : 'fail') + '</span>';
+        checks.appendChild(d);
+      }, reduce ? 0 : 260 * (j + 1)));
+      setTimeout(() => {
+        const ok = cl.s >= 0.5;
+        bar.style.width = (cl.s * 100) + '%';
+        bar.style.background = ok ? 'var(--good)' : 'var(--bad)';
+        score.textContent = cl.s.toFixed(3);
+        pill.textContent = ok ? 'VERIFIED' : 'BLOCKED';
+        pill.className = 'pill ' + (ok ? 'ok' : 'no');
+      }, reduce ? 0 : 260 * (cl.c.length + 1));
+      timer = setTimeout(() => { i = (i + 1) % claims.length; render(i); }, 5200);
+    };
+    if (reduce) { done(); return; }
+    el.innerHTML = '<span class="caret"></span>';
+    typing = setInterval(() => {
+      n++; el.innerHTML = cl.t.slice(0, n).replace(/&/g,'&amp;').replace(/</g,'&lt;') + '<span class="caret"></span>';
+      if (n >= cl.t.length) { clearInterval(typing); done(); }
+    }, 22);
   }
-  btn.disabled=false;
-}
+  render(0);
+  $('next').addEventListener('click', () => { i = (i + 1) % claims.length; render(i); });
 
-/* ── TAB SWITCHING ── */
-function switchTab(name){
-  document.querySelectorAll('.itab').forEach((t,i)=>{
-    const names=['paste','file','image'];
-    t.classList.toggle('active',names[i]===name);
+  /* ---------- copy email ---------- */
+  $('copy').addEventListener('click', e => {
+    const b = e.currentTarget, txt = 'axrxnxa@gmail.com';
+    const ok = () => { b.textContent = 'Copied'; setTimeout(() => b.textContent = 'Copy email', 1800); };
+    const fallback = () => { const r = document.createRange(); r.selectNodeContents($('email')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = 'Selected, press Ctrl+C'; setTimeout(() => b.textContent = 'Copy email', 2400); };
+    try { navigator.clipboard.writeText(txt).then(ok, fallback); } catch (_) { fallback(); }
   });
-  document.querySelectorAll('.itab-panel').forEach(p=>p.classList.remove('active'));
-  document.getElementById('tab-'+name).classList.add('active');
-}
 
-/* ── DRAG & DROP HELPERS ── */
-function dzDrag(e,id){e.preventDefault();document.getElementById(id).classList.add('dragover');}
-function dzLeave(id){document.getElementById(id).classList.remove('dragover');}
-function dzDropFile(e){e.preventDefault();dzLeave('fileDropZone');const f=e.dataTransfer.files[0];if(f)handleFileUpload(f);}
-function dzDropImg(e){e.preventDefault();dzLeave('imgDropZone');const f=e.dataTransfer.files[0];if(f)handleImageUpload(f);}
-
-/* ── FILE UPLOAD (TXT / PDF plain text) ── */
-function handleFileUpload(file){
-  if(!file)return;
-  const preview=document.getElementById('filePreview');
-  const nameEl=document.getElementById('fileName');
-  const status=document.getElementById('fileStatus');
-  nameEl.textContent=file.name;
-  preview.classList.add('show');
-  status.className='ocr-status loading';
-  status.innerHTML='<div class="ocr-spinner"></div> Reading file...';
-
-  if(file.type==='text/plain'||file.name.endsWith('.txt')){
-    const reader=new FileReader();
-    reader.onload=e=>{
-      const text=e.target.result;
-      document.getElementById('textInput').value=text;
-      updateCharCount(document.getElementById('textInput'));
-      status.className='ocr-status done';
-      status.innerHTML='✓ Text extracted — '+text.length.toLocaleString()+' characters ready';
-      switchTab('paste');
-    };
-    reader.readAsText(file);
-  } else if(file.type==='application/pdf'||file.name.endsWith('.pdf')){
-    status.className='ocr-status loading';
-    status.innerHTML='<div class="ocr-spinner"></div> Extracting PDF text via AI...';
-    const reader=new FileReader();
-    reader.onload=async e=>{
-      const base64=e.target.result.split(',')[1];
-      try{
-        const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
-          model:"claude-sonnet-4-20250514",max_tokens:4000,
-          messages:[{role:"user",content:[
-            {type:"document",source:{type:"base64",media_type:"application/pdf",data:base64}},
-            {type:"text",text:"Extract ALL text from this PDF document. Return only the raw text, no commentary, no formatting markup."}
-          ]}]
-        })});
-        const data=await res.json();
-        const text=(data.content||[]).map(b=>b.text||'').join('');
-        document.getElementById('textInput').value=text;
-        updateCharCount(document.getElementById('textInput'));
-        status.className='ocr-status done';
-        status.innerHTML='✓ PDF extracted — '+text.length.toLocaleString()+' characters ready';
-        switchTab('paste');
-      }catch(err){
-        status.className='ocr-status error';
-        status.innerHTML='✗ Could not extract PDF. Try copy-pasting text directly.';
+  /* ---------- generative project art ---------- */
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  function rng(seed){ return () => (seed = (seed * 16807) % 2147483647) / 2147483647; }
+  const painters = {
+    graph(ctx, w, h, t){
+      const r = rng(7), nodes = [];
+      for (let k = 0; k < 70; k++) nodes.push([r()*w, r()*h, r()*Math.PI*2]);
+      ctx.strokeStyle = css('--line'); ctx.lineWidth = 1;
+      nodes.forEach((a, x) => nodes.forEach((b, y) => { if (y > x && Math.hypot(a[0]-b[0], a[1]-b[1]) < w*0.13) { ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke(); } }));
+      nodes.forEach((n, k) => { const p = 0.5 + 0.5*Math.sin(t/900 + n[2]); ctx.fillStyle = k % 9 === 0 ? css('--bad') : (k % 3 === 0 ? css('--accent') : css('--muted')); ctx.beginPath(); ctx.arc(n[0], n[1], 2 + (k % 3 === 0 ? 2*p : 0.5), 0, 7); ctx.fill(); });
+    },
+    lora(ctx, w, h, t){
+      ctx.lineWidth = 1.5;
+      for (let k = 0; k < 7; k++) {
+        ctx.strokeStyle = k === 3 ? css('--accent') : css('--line');
+        ctx.beginPath();
+        for (let x = 0; x <= w; x += 4) { const y = h*0.42 + Math.sin(x/(22+k*3) + t/700 + k) * (10 + k*4) * Math.sin(x/w*Math.PI); x ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
+        ctx.stroke();
       }
-    };
-    reader.readAsDataURL(file);
-  } else {
-    status.className='ocr-status error';
-    status.innerHTML='✗ Unsupported format. Please use TXT or PDF.';
-  }
-}
-
-function clearFile(){
-  document.getElementById('fileInput').value='';
-  document.getElementById('filePreview').classList.remove('show');
-  document.getElementById('fileStatus').className='ocr-status';
-  document.getElementById('fileStatus').innerHTML='';
-}
-
-/* ── IMAGE OCR ── */
-function handleImageUpload(file){
-  if(!file)return;
-  const preview=document.getElementById('imgPreview');
-  const nameEl=document.getElementById('imgName');
-  const status=document.getElementById('imgStatus');
-  const thumb=document.getElementById('imgThumb');
-  const thumbImg=document.getElementById('imgPreviewEl');
-  nameEl.textContent=file.name;
-  preview.classList.add('show');
-
-  const objectUrl=URL.createObjectURL(file);
-  thumbImg.src=objectUrl;
-  thumb.style.display='block';
-
-  const validTypes=['image/jpeg','image/png','image/webp','image/gif'];
-  const mediaType=validTypes.includes(file.type)?file.type:'image/jpeg';
-
-  status.className='ocr-status loading';
-  status.innerHTML='<div class="ocr-spinner"></div> Reading text from image...';
-
-  const reader=new FileReader();
-  reader.onload=async e=>{
-    const base64=e.target.result.split(',')[1];
-    try{
-      const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
-        model:"claude-sonnet-4-20250514",max_tokens:4000,
-        messages:[{role:"user",content:[
-          {type:"image",source:{type:"base64",media_type:mediaType,data:base64}},
-          {type:"text",text:"This image contains a legal document, contract, or text. Extract ALL visible text from it. Return only the raw text exactly as it appears, no commentary."}
-        ]}]
-      })});
-      const data=await res.json();
-      const text=(data.content||[]).map(b=>b.text||'').join('');
-      if(!text.trim()){throw new Error('No text found');}
-      document.getElementById('textInput').value=text;
-      updateCharCount(document.getElementById('textInput'));
-      status.className='ocr-status done';
-      status.innerHTML='✓ Text extracted from image — '+text.length.toLocaleString()+' characters ready';
-      switchTab('paste');
-    }catch(err){
-      status.className='ocr-status error';
-      status.innerHTML='✗ Could not read text from image. Try a clearer photo.';
+    },
+    cluster(ctx, w, h, t){
+      const r = rng(11), cs = [[.28,.45,css('--accent')],[.48,.45,css('--good')],[.74,.3,css('--amber')]];
+      cs.forEach((c, j) => { for (let k = 0; k < 55; k++) { const a = r()*7, d = Math.pow(r(),.6)*w*0.11, wob = Math.sin(t/1200 + k + j)*2; ctx.fillStyle = c[2]; ctx.globalAlpha = 0.75; ctx.beginPath(); ctx.arc(c[0]*w + Math.cos(a)*d + wob, c[1]*h + Math.sin(a)*d, 2.4, 0, 7); ctx.fill(); } });
+      ctx.globalAlpha = 1;
+    },
+    uptime(ctx, w, h, t){
+      const cols = 40, gw = w/cols, off = Math.floor(t/400);
+      for (let k = 0; k < cols; k++) { const down = ((k + off) % 37) === 0; ctx.fillStyle = down ? css('--bad') : css('--good'); ctx.globalAlpha = down ? 1 : 0.55; ctx.fillRect(k*gw + 2, h*0.24, gw - 4, h*0.22); }
+      ctx.globalAlpha = 1;
+    },
+    bars(ctx, w, h, t){
+      const n = 12, bw = w/n;
+      for (let k = 0; k < n; k++) { const before = 0.35 + 0.25*Math.abs(Math.sin(k*1.7)); const after = before*0.5; const f = 0.5 + 0.5*Math.sin(t/1400); const v = before - (before-after)*f; ctx.fillStyle = k % 2 ? css('--accent') : css('--muted'); ctx.globalAlpha = k % 2 ? 0.85 : 0.35; ctx.fillRect(k*bw + bw*0.2, h*0.62 - v*h*0.75, bw*0.6, v*h*0.75); }
+      ctx.globalAlpha = 1;
     }
   };
-  reader.readAsDataURL(file);
-}
-
-function clearImg(){
-  document.getElementById('imageInput').value='';
-  document.getElementById('imgPreview').classList.remove('show');
-  document.getElementById('imgStatus').className='ocr-status';
-  document.getElementById('imgStatus').innerHTML='';
-  document.getElementById('imgThumb').style.display='none';
-}
-
-/* ── UPDATED ANALYZE: reads from textarea regardless of source ── */
-
-function copyResult(){
-  const v=document.getElementById('verdictLabel').textContent;
-  const s=document.getElementById('riskScore').textContent;
-  const sum=document.getElementById('summaryText').textContent;
-  const bl=document.getElementById('bottomLine').textContent;
-  const flags=[...document.querySelectorAll('.flag-text')].map(el=>'• '+el.textContent).join('\n');
-  const qs=[...document.querySelectorAll('.question-item')].map(el=>'? '+el.querySelector('span:last-child').textContent).join('\n');
-  const txt=`IS THIS NORMAL? — ANALYSIS\n\nVerdict: ${v} (Risk: ${s}/100)\n\n${sum}\n\nKey Points:\n${flags}\n\nQuestions to ask:\n${qs}\n\nBottom Line: ${bl}\n\n— isthisnormal.app`;
-  navigator.clipboard.writeText(txt).then(()=>{
-    const btn=document.querySelector('.action-btn.primary');const orig=btn.innerHTML;
-    btn.textContent='✓ COPIED!';setTimeout(()=>btn.innerHTML=orig,2000);
-  });
-}
-async function showQuickSummary(){
-  const text=document.getElementById('textInput').value.trim();
-  if(!text)return;
-  const modal=document.getElementById('summaryModal');
-  modal.style.display='flex';
-  document.getElementById('modalSummaryLoading').style.display='flex';
-  document.getElementById('modalSummaryContent').style.display='none';
-  try{
-    const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({
-      model:"claude-sonnet-4-20250514",max_tokens:600,
-      system:`You are a legal document summarizer. Given a legal document or clause, produce a SHORT client-friendly summary a normal person can understand in 30 seconds.
-
-Return ONLY valid JSON:
-{
-  "title": "5-7 word title describing what type of document this is",
-  "summary": "3-4 sentences. Plain English. What is this document? Who are the parties? What are the main obligations? What's the most important thing to know?"
-}
-No jargon. No markdown. No backticks.`,
-      messages:[{role:"user",content:text}]
-    })});
-    const data=await res.json();
-    const raw=(data.content||[]).map(b=>b.text||'').join('');
-    const p=JSON.parse(raw.replace(/```json|```/g,'').trim());
-    document.getElementById('modalTitle').textContent=p.title||'Document Summary';
-    document.getElementById('modalBody').textContent=p.summary||'';
-    document.getElementById('modalSummaryLoading').style.display='none';
-    document.getElementById('modalSummaryContent').style.display='block';
-  }catch(e){
-    document.getElementById('modalSummaryLoading').innerHTML='✗ Could not generate summary. Try again.';
-  }
-}
-function closeSummaryModal(){
-  document.getElementById('summaryModal').style.display='none';
-}
-function copySummaryModal(){
-  const t=document.getElementById('modalTitle').textContent;
-  const b=document.getElementById('modalBody').textContent;
-  navigator.clipboard.writeText(t+'\n\n'+b).then(()=>{
-    const btn=document.getElementById('copyModalBtn');
-    btn.textContent='✓ COPIED!';setTimeout(()=>btn.textContent='COPY',2000);
-  });
-}
-document.getElementById('summaryModal').addEventListener('click',function(e){if(e.target===this)closeSummaryModal();});
+  const canv = [...document.querySelectorAll('canvas[data-art]')];
+  function size(c){ const r = c.getBoundingClientRect(), d = Math.min(devicePixelRatio || 1, 2); c.width = Math.max(1, r.width*d); c.height = Math.max(1, r.height*d); const ctx = c.getContext('2d'); ctx.setTransform(d,0,0,d,0,0); c._w = r.width; c._h = r.height; c._ctx = ctx; }
+  function frame(t){ canv.forEach(c => { if (!c._ctx) size(c); c._ctx.clearRect(0,0,c._w,c._h); painters[c.dataset.art](c._ctx, c._w, c._h, t); }); if (!reduce) requestAnimationFrame(frame); }
+  addEventListener('resize', () => canv.forEach(size));
+  requestAnimationFrame(frame);
+})();
 </script>
-</body>
-</html>
+</body></html>
